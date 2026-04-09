@@ -2,18 +2,31 @@ package fr.univamu.iut.commandes;
 
 import jakarta.ws.rs.*;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
- * Manage the commands, that are stored in the api
+ * Manage the commands that are stored in the api.
  */
 @Path("/commandes")
 public class Commands {
 
+    /**
+     * Class Attribute that store a object of class CommandDB.
+     */
+    protected CommandBD commandBD;
+
     // url : http://localhost:8082/commandes/api
 
-    public Commands() {
+    /**
+     * Constructor of the class Commands. Create an object of CommandDB class,
+     * that is stored in the class attribute "commandDB".
+     * NOTE : The exception come from the "CommandDB" class.
+     * @throws SQLException Thrown if there is an error of connection or other to the database.
+     * @throws ClassNotFoundException Thrown if the class is not found?
+     */
+    public Commands() throws SQLException, ClassNotFoundException {
+        commandBD = new CommandBD();
     }
 
     /**
@@ -41,7 +54,7 @@ public class Commands {
 
     /**
      * Get a specific command by using his id.
-     * @param id The id of the command
+     * @param id The id of the command.
      * @return TODO: implement it
      */
     @Path("{id}")

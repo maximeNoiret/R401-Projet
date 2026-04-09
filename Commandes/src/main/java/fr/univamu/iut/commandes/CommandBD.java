@@ -4,9 +4,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * Class that manage connection and SQL query to the database used in the api "Commandes".
+ */
 public class CommandBD {
+    /**
+     * Connection object that is used to interact to the database.
+     */
     protected Connection dbConnection;
 
+    /**
+     * Constructor of the class CommandDB, the connection to the DB is hardcoded
+     * in the class, meaning that there is no natural way to make a connection to another class.
+     * @throws SQLException Thrown if there is an error to the access of a database.
+     * @throws ClassNotFoundException Thrown if the class is not found.
+     */
     public CommandBD() throws SQLException, ClassNotFoundException {
         this.connect("jdbc:mariadb://mysql-alexexercices.alwaysdata.net/alexexercices_commands","alexexercices_commands", "y}3Zh%Qy9]TSzZi");
     }
@@ -100,7 +112,7 @@ public class CommandBD {
 
     /**
      * Get all the commands.
-     * @return String All the commands.
+     * @return All the commands.
      */
     public String getAllCommands(){
         String query = "select * from commands";
@@ -111,6 +123,21 @@ public class CommandBD {
             return result.toString();
 
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Get all the command made a specific subscriber.
+     * @param subscriberId The ID of the specific subscriber.
+     * @return All the command made by the subscriber.
+     */
+    public String getAllCommandsBySubscriber(int subscriberId){
+        String query = "SELECT * FROM commands WHERE subscriberId = ?";
+        try(PreparedStatement ps = dbConnection.prepareStatement(query)){
+            ps.setInt(1, subscriberId);
+            return ps.executeQuery().toString();
+        } catch (SQLException e){
             throw new RuntimeException(e);
         }
     }
