@@ -32,12 +32,13 @@ public class Commands {
     /**
      * Return all the commands made by a specific subscriber.
      * @param subscriberId The id of the subscriber that ordered the commands.
+     * @return All the command made by the subscriber.
      */
     @Path("{subscriberId}")
     @GET
-    public String getAllCommandes(Integer subscriberId){
+    public String getAllCommandes(int subscriberId){
         //TODO : implement it, more info in openapi-commandes.yaml.yaml
-        return null; //TODO replace this stub to something useful
+        return commandBD.getAllCommandsBySubscriber(subscriberId);
     }
 
     /**
@@ -48,20 +49,20 @@ public class Commands {
      * @param menus A map where the key is the id of a menu, and the value the quantity of the key menu.
      */
     @POST
-    public void CreateCommande(Integer subscriberId, String adrsDelivery, String deadline, Map<Integer,Integer> menus){
-        // TODO : implement it
+    public void CreateCommande(int subscriberId, String adrsDelivery, String deadline, Map<Integer,Integer> menus){
+        commandBD.createCommand(subscriberId, adrsDelivery, deadline, menus);
     }
 
     /**
      * Get a specific command by using his id.
      * @param id The id of the command.
-     * @return TODO: implement it
+     * @return The command.
      */
     @Path("{id}")
     @GET
-    public String getCommandeById(Integer id){
+    public String getCommandeById(int id){
         //TODO : implement it
-        return null; //TODO replace this stub to something useful
+        return commandBD.getCommand(id);
     }
 
     /**
@@ -71,8 +72,8 @@ public class Commands {
      * @param deadline The new deadline.
      */
     @PUT
-    public void updateCommande(Integer id, String adrsDelivery, String deadline){
-        // TODO : implement it
+    public void updateCommande(int id, String adrsDelivery, String deadline){
+        commandBD.updateCommand(id, adrsDelivery, deadline);
     }
 
     /**
@@ -80,8 +81,8 @@ public class Commands {
      * @param id The id of the command to be deleted.
      */
     @DELETE
-    public void deleteCommande(Integer id){
-        //TODO : implement it
+    public void deleteCommande(int id){
+        commandBD.deleteCommand(id);
     }
 
 
