@@ -1,13 +1,13 @@
 package fr.univamu.iut.commandes;
+import java.lang.reflect.Array;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class CommandBD {
     protected Connection dbConnection;
 
     public CommandBD() throws SQLException, ClassNotFoundException {
-        // jdbc:mariadb://mysql-alexexercices.alwaysdata.net/alexexercices_commands
-        // User : alexexercices_commands
-        // Password : y}3Zh%Qy9]TSzZi
         this.connect("jdbc:mariadb://mysql-alexexercices.alwaysdata.net/alexexercices_commands","alexexercices_commands", "y}3Zh%Qy9]TSzZi");
     }
 
@@ -15,8 +15,8 @@ public class CommandBD {
      * Create a connection to the database that contains the commands.
      * @param infoConnection A string that contain the information for the connection to the database.
      *                       (e.g. jdbc:mariadb://mysql-[compte].alwaysdata.net/[compte]_library_db)
-     * @param user The username used for the connection
-     * @param pwd The password used for the connection
+     * @param user The username used for the connection.
+     * @param pwd The password used for the connection.
      */
     public void connect(String infoConnection, String user, String pwd ) throws java.sql.SQLException, java.lang.ClassNotFoundException {
         Class.forName("org.mariadb.jdbc.Driver");
@@ -40,8 +40,67 @@ public class CommandBD {
     }
 
     /**
+     * Get the id of the created command. Since the id of a command is an auto
+     * increment, the newest command has automatically the highest id.
+     * @return The highest command id in the database.
+     */
+    public Integer getMaxId(){
+        String getIdQuery = "SELECT MAX id FROM commands";
+        try (PreparedStatement ps = dbConnection.prepareStatement(getIdQuery)){
+            ResultSet result = ps.executeQuery();
+            return result.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Get a specific command.
+     * @param id The ID of the wanted command.
+     * @return The string that contain all the data of the command.
+     */
+    public String getCommand(int id){
+        String query = "SELECT * FROM commands WHERE id = ?";
+        try (PreparedStatement ps = dbConnection.prepareStatement(query)){
+            return ps.executeQuery().getString(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Get the address of delivery of a specific command.
+     * @param id The ID the specified command.
+     * @return The address of delivery.
+     */
+    public String getAdrsDelivery(int id){
+        String query = "SELECT deliveryAddress FROM adresses WHERE id = ?";
+        try (PreparedStatement ps = dbConnection.prepareStatement(query)){
+            ps.setInt(1, id);
+            return ps.executeQuery().getString(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Get the deadline (represent a date) of a specific command.
+     * @param id The ID od the specified command.
+     * @return The deadline of the command.
+     */
+    public String getDeadline(int id){
+        String query = "SELECT deadline FROM commands WHERE id = ?";
+        try (PreparedStatement ps = dbConnection.prepareStatement(query)){
+            ps.setInt(1, id);
+            return ps.executeQuery().getString(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Get all the commands.
-     * @return String All the commands
+     * @return String All the commands.
      */
     public String getAllCommands(){
         String query = "select * from commands";
@@ -68,6 +127,75 @@ public class CommandBD {
             // execute query
             ResultSet result = ps.executeQuery();
             return result.toString();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Create a new Commands.
+     * @param subscriberId The ID of the subscriber that made the command.
+     * @param adrsDelivery The address of delivery of the command.
+     * @param deadline The deadline for the delivery.
+     * @param menus A map where the key is the id of a menu, and the value the quantity of the key menu.
+     */
+    public void createCommand(int subscriberId, String adrsDelivery, String deadline, Map<Integer,Integer> menus){
+        // create a command
+        String query = "INSERT INTO Command(deliveryAddress, deadline, subscriberId) VALUES (?, ?, ?)";
+        try ( PreparedStatement ps = dbConnection.prepareStatement(query) ){
+            ps.setString(1, adrsDelivery);
+            ps.setString(2, deadline);
+            ps.setInt(3, subscriberId);
+            // execute query
+            ps.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        // create the link between the different menus and the command where they are present
+        // TODO : look if there is a better way to do this
+        for(Integer key : menus.keySet()){
+            String queryContainMenu = "INSERT INTO contains_menu(command_id, menu_id, quantity) VALUES (?, ?, ?)";
+            try ( PreparedStatement ps = dbConnection.prepareStatement(queryContainMenu) ){
+                ps.setInt(1, getMaxId());
+                ps.setInt(2, key);
+                ps.setInt(3, menus.get(key));
+                // execute query
+                ps.executeQuery();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * Update the address and the deadline of a command.
+     * @param id The ID of the command to update
+     * @param adrsDelivery The new address of delivery.
+     * @param deadline The new deadline (represent a date).
+     */
+    public void updateCommand(int id, String adrsDelivery, String deadline){
+        String query = "UPDATE commands SET deliveryAddress = ?, deadline = ? WHERE id = ?";
+        try (PreparedStatement ps = dbConnection.prepareStatement(query)){
+            ps.setString(1, adrsDelivery);
+            ps.setString(2, deadline);
+            ps.setInt(3, id);
+
+            ps.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Delete a command.
+     * @param id The id of the command to be deleted.
+     */
+    public void deleteCommand(int id){
+        String query = "DELETE FROM commands WHERE id = ?";
+        try(PreparedStatement ps = dbConnection.prepareStatement(query)){
+            ps.setInt(1, id);
+            ps.executeQuery();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
