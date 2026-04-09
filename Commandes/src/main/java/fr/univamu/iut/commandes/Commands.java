@@ -1,6 +1,7 @@
 package fr.univamu.iut.commandes;
 
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Application;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
  * Manage the commands that are stored in the api.
  */
 @Path("/commandes")
-public class Commands {
+public class Commands extends Application {
 
     /**
      * Class Attribute that store a object of class CommandDB.
